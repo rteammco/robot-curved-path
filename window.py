@@ -4,13 +4,19 @@ import math
 
 class DemoUI():
   """Demo UI for the path computation stuff."""
+  # display object sizes
   POINT_SIZE = 5
   LINE_SIZE = 25
+  # display colors
   FIELD_COLOR = "#00680A"
   ROBOT_COLOR = "white"
   BALL_COLOR = "red"
-  CTRL_POINT_COLOR = "blue"
+  OBSTACLE_COLOR = "blue"
   PATH_COLOR = "green"
+  # option constants
+  SELECT_ROBOT = 1
+  SELECT_BALL = 2
+  SELECT_OBSTACLE = 3
 
   def __init__(self, width, height):
     """Initialize the window and default object locations (no control points)."""
@@ -21,48 +27,71 @@ class DemoUI():
     self.canvas.bind("<Button-1>", self.left_click_handle)
     self.canvas.bind("<Button-2>", self.right_click_handle)
     self.canvas.pack()
-    # set the control UI
+    # set the control UI: buttons and click action selection
     self.mode_var = Tk.IntVar()
     self.mode_var.set(1)
-    options = [("Robot Location", 1), ("Ball Location", 2), ("Add Control Point", 3)]
+    options = [("Robot Location", self.SELECT_ROBOT),
+               ("Ball Location", self.SELECT_BALL),
+               ("Add Obstacle", self.SELECT_OBSTACLE)]
     for option, val in options:
       Tk.Radiobutton(self.main_window, text=option, variable=self.mode_var,
                      indicatoron=0, value=val).pack(anchor=Tk.CENTER)
-    Tk.Button(self.main_window, text="Clear Control Points",
+    Tk.Button(self.main_window, text="Compute Path",
+              command=self.compute_path).pack(anchor=Tk.CENTER)
+    Tk.Button(self.main_window, text="Clear Everything",
               command=self.clear_all).pack(anchor=Tk.CENTER)
     # initialize object locations
-    self.robot = (width/2, height/2, 0)
-    self.ball = (width/2, 3*height/4, 0)
-    self.control_points = []
+    self.robot = [width/2, height/2, 0]
+    self.ball = [width/2, 3*height/4, 0]
+    self.obstacles = []
 
   def left_click_handle(self, event):
-    if self.mode_var.get() == 1:
-      self.set_robot_pos(event.x, event.y, 0)
-    elif self.mode_var.get() == 2:
-      self.set_ball_pos(event.x, event.y, 0)
+    """Handles action for a left-click event (set location)."""
+    if self.mode_var.get() == self.SELECT_ROBOT:
+      self.set_robot_pos(event.x, event.y)
+    elif self.mode_var.get() == self.SELECT_BALL:
+      self.set_ball_pos(event.x, event.y)
     else:
-      self.add_control_point(event.x, event.y)
+      self.add_obstacle(event.x, event.y)
     self.render()
 
   def right_click_handle(self, event):
-    print event.x, event.y
+    """Handles action for a left-click event (set location)."""
+    if self.mode_var.get() == self.SELECT_ROBOT:
+      pass
+    elif self.mode_var.get() == self.SELECT_BALL:
+      pass
+
+  def compute_path(self):
+    """Computes and renders the desired path."""
+    pass
 
   def clear_all(self):
-    """Clears all control points from the screen."""
-    self.control_points = []
+    """Clears all obstacles and the path from the screen."""
+    self.obstacles = []
     self.render()
 
-  def set_robot_pos(self, x, y, orientation):
-    """Sets the starting location and orientation of the robot."""
-    self.robot = (x, y, orientation)
+  def set_robot_pos(self, x, y):
+    """Sets the starting location of the robot, preserving orientation."""
+    self.robot[0] = x
+    self.robot[1] = y
 
-  def set_ball_pos(self, x, y, trajectory):
-    """Sets the location and desired trajectory of the ball."""
-    self.ball = (x, y, trajectory)
+  def set_robot_orientation(self, orientation):
+    """Sets the robot's orientation, preserving location."""
+    self.robot[2] = orientation
 
-  def add_control_point(self, x, y):
-    """Adds and draws new path control point in the simulation."""
-    self.control_points.append((x, y))
+  def set_ball_pos(self, x, y):
+    """Sets the location of the ball, preserving trajectory."""
+    self.ball[0] = x
+    self.ball[1] = y
+
+  def set_ball_trajectory(self, trajectory):
+    """Sets the ball's desired trajectory, preserving location."""
+    self.ball[2] = trajectory
+
+  def add_obstacle(self, x, y):
+    """Adds an obstacle and redraws the simulation."""
+    self.obstacles.append((x, y))
 
   def get_line_endpoints(self, x, y, angle):
     """Returns the end points of a line (LINE_SIZE long) given the angle and start point."""
@@ -74,10 +103,10 @@ class DemoUI():
     """Clears the canvas, and draws everything again."""
     self.canvas.delete("all")
     r = self.POINT_SIZE
-    for pnt in self.control_points:
+    for pnt in self.obstacles:
       x = pnt[0]
       y = pnt[1]
-      self.canvas.create_oval(x-r, y-r, x+r, y+r, fill=self.CTRL_POINT_COLOR, outline="")
+      self.canvas.create_oval(x-r, y-r, x+r, y+r, fill=self.OBSTACLE_COLOR, outline="")
     x = self.ball[0]
     y = self.ball[1]
     angle = self.ball[2]
@@ -91,8 +120,8 @@ class DemoUI():
 
 
 if __name__ == "__main__":
-  print "hello"
+  print "Hello!"
   w = DemoUI(800, 480)
   w.render()
   w.main_window.mainloop()
-  print "done"
+  print "Goodbye."
