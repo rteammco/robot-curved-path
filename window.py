@@ -12,6 +12,7 @@ class DemoUI():
   ROBOT_COLOR = "white"
   BALL_COLOR = "red"
   OBSTACLE_COLOR = "blue"
+  CTRL_POINT_COLOR = "black"
   PATH_COLOR = "green"
   # option constants
   SELECT_ROBOT = 1
@@ -44,6 +45,7 @@ class DemoUI():
     self.robot = [width/2, height/2, 0]
     self.ball = [width/2, 3*height/4, 0]
     self.obstacles = []
+    self.control_points = []
 
   def left_click_handle(self, event):
     """Handles action for a left-click event (set location)."""
@@ -78,11 +80,26 @@ class DemoUI():
 
   def compute_path(self):
     """Computes and renders the desired path."""
-    pass
+    # compute slope and y-intercept for robot using orientation
+    robot_slope = math.tan(self.robot[2])
+    robot_intercept = self.robot[1] - robot_slope * self.robot[0]
+    # compute slope and y-intercept for ball (using inverse trajectory)
+    ball_slope = math.tan(self.ball[2])
+    ball_intercept = self.ball[1] - ball_slope * self.ball[0]
+    # solve for x where the lines meet
+    x = (ball_intercept - robot_intercept) / (robot_slope - ball_slope)
+    y = robot_slope * x + robot_intercept
+    control_point = (x, y)
+    if len(self.control_points) == 0:
+      self.control_points.append(control_point)
+    else:
+      self.control_points[0] = control_point
+    self.render()
 
   def clear_all(self):
     """Clears all obstacles and the path from the screen."""
     self.obstacles = []
+    self.control_points = []
     self.render()
 
   def set_robot_pos(self, x, y):
@@ -121,6 +138,10 @@ class DemoUI():
       x = pnt[0]
       y = pnt[1]
       self.canvas.create_oval(x-r, y-r, x+r, y+r, fill=self.OBSTACLE_COLOR, outline="")
+    for pnt in self.control_points:
+      x = pnt[0]
+      y = pnt[1]
+      self.canvas.create_oval(x-r, y-r, x+r, y+r, fill=self.CTRL_POINT_COLOR, outline="")
     x = self.ball[0]
     y = self.ball[1]
     angle = self.ball[2]
