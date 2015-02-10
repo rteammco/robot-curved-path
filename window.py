@@ -13,6 +13,7 @@ class DemoUI():
   BALL_COLOR = "red"
   OBSTACLE_COLOR = "blue"
   CTRL_POINT_COLOR = "black"
+  TRIANGLE_COLOR = "yellow"
   PATH_COLOR = "green"
   # option constants
   SELECT_ROBOT = 1
@@ -134,19 +135,30 @@ class DemoUI():
     """Clears the canvas, and draws everything again."""
     self.canvas.delete("all")
     r = self.POINT_SIZE
+    # draw obstacles
     for pnt in self.obstacles:
       x = pnt[0]
       y = pnt[1]
       self.canvas.create_oval(x-r, y-r, x+r, y+r, fill=self.OBSTACLE_COLOR, outline="")
+    # draw control points (for the curve)
     for pnt in self.control_points:
       x = pnt[0]
       y = pnt[1]
       self.canvas.create_oval(x-r, y-r, x+r, y+r, fill=self.CTRL_POINT_COLOR, outline="")
+    # if the main control point exists, draw the triangle between it
+    if len(self.control_points) > 0:
+      start_x, start_y = self.control_points[0][0], self.control_points[0][1]
+      end_x, end_y = self.robot[0], self.robot[1]
+      self.canvas.create_line(start_x, start_y, end_x, end_y, fill=self.TRIANGLE_COLOR, dash=(4, 4))
+      end_x, end_y = self.ball[0], self.ball[1]
+      self.canvas.create_line(start_x, start_y, end_x, end_y, fill=self.TRIANGLE_COLOR, dash=(4, 4))
+    # draw the ball, displaying its trajectory
     x = self.ball[0]
     y = self.ball[1]
     angle = self.ball[2]
     self.canvas.create_oval(x-r, y-r, x+r, y+r, fill=self.BALL_COLOR, outline="")
     self.canvas.create_line(x, y, self.get_line_endpoints(x, y, angle), fill=self.BALL_COLOR)
+    # draw the robot, displaying its orientation
     x = self.robot[0]
     y = self.robot[1]
     angle = self.robot[2]
