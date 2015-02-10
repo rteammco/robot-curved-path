@@ -56,11 +56,25 @@ class DemoUI():
     self.render()
 
   def right_click_handle(self, event):
-    """Handles action for a left-click event (set location)."""
+    """Handles action for a right-click event (set orientation/trajectory)."""
     if self.mode_var.get() == self.SELECT_ROBOT:
-      pass
+      angle = self.get_angle(self.robot[0], self.robot[1], event.x, event.y)
+      if angle is not None:
+        self.set_robot_orientation(angle)
+        self.render()
     elif self.mode_var.get() == self.SELECT_BALL:
-      pass
+      angle = self.get_angle(self.ball[0], self.ball[1], event.x, event.y)
+      if angle is not None:
+        self.set_ball_trajectory(angle)
+        self.render()
+
+  def get_angle(self, x1, y1, x2, y2):
+    """Computes and returns the angle between points x1,y1 and x2,y2."""
+    if x1 == x2 and y1 == y2:
+      return None
+    x_diff = x2 - x1
+    y_diff = y2 - y1
+    return math.atan2(y_diff, x_diff)
 
   def compute_path(self):
     """Computes and renders the desired path."""
