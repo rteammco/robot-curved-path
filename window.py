@@ -80,7 +80,19 @@ class DemoUI():
     return math.atan2(y_diff, x_diff)
 
   def compute_path(self):
-    """Computes and renders the desired path."""
+    """Computes the Bezier path."""
+    # compute the control point (and add to the list)
+    control_point = self.compute_control_point()
+    if len(self.control_points) == 0:
+      self.control_points.append(control_point)
+    else:
+      self.control_points[0] = control_point
+    # use control point to calculate the Bezier curve
+    ;
+    self.render()
+
+  def compute_control_point(self):
+    """Computes the main control point for the path."""
     # compute slope and y-intercept for robot using orientation
     robot_slope = math.tan(self.robot[2])
     robot_intercept = self.robot[1] - robot_slope * self.robot[0]
@@ -91,11 +103,7 @@ class DemoUI():
     x = (ball_intercept - robot_intercept) / (robot_slope - ball_slope)
     y = robot_slope * x + robot_intercept
     control_point = (x, y)
-    if len(self.control_points) == 0:
-      self.control_points.append(control_point)
-    else:
-      self.control_points[0] = control_point
-    self.render()
+    return control_point
 
   def clear_all(self):
     """Clears all obstacles and the path from the screen."""
