@@ -50,14 +50,17 @@ class DemoUI():
     self.obstacles = []
     self.control_points = []
     self.ctrl_dist_to_base = 0
-    self.dist_to_ball = self.get_dist(self.robot[0], self.robot[1], self.ball[0], self.ball[1])
+    self.dist_to_ball = 0
+    self.update_dist_to_ball()
 
   def left_click_handle(self, event):
     """Handles action for a left-click event (set location)."""
     if self.mode_var.get() == self.SELECT_ROBOT:
       self.set_robot_pos(event.x, event.y)
+      self.update_dist_to_ball()
     elif self.mode_var.get() == self.SELECT_BALL:
       self.set_ball_pos(event.x, event.y)
+      self.update_dist_to_ball()
     else:
       self.add_obstacle(event.x, event.y)
     self.render()
@@ -88,6 +91,10 @@ class DemoUI():
     normal = (x_diff / norm, y_diff / norm)
     return math.atan2(y_diff, x_diff), normal
 
+  def update_dist_to_ball(self):
+    """Computes the distance between the robot and the ball."""
+    self.dist_to_ball = self.get_dist(self.robot[0], self.robot[1], self.ball[0], self.ball[1])
+
   def get_dist(self, x1, y1, x2, y2):
     """Returns the distance between the given two points."""
     return math.sqrt((y2 - y1)*(y2 - y1) + (x2 - x1)*(x2 - x1))
@@ -108,7 +115,7 @@ class DemoUI():
          self.robot[0], self.robot[1],
          self.ball[0], self.ball[1],
          control_point[0], control_point[1])
-    self.dist_to_ball = self.get_dist(self.robot[0], self.robot[1], self.ball[0], self.ball[1])
+    self.update_dist_to_ball()
     if len(self.control_points) == 0:
       self.control_points.append(control_point)
     else:
