@@ -115,7 +115,6 @@ class DemoUI():
          self.robot[0], self.robot[1],
          self.ball[0], self.ball[1],
          control_point[0], control_point[1])
-    self.update_dist_to_ball()
     if len(self.control_points) == 0:
       self.control_points.append(control_point)
     else:
@@ -216,13 +215,12 @@ class DemoUI():
       self.canvas.create_line(start_x, start_y, end_x, end_y, fill=self.TRIANGLE_COLOR, dash=(4, 4))
       end_x, end_y = self.ball[0], self.ball[1]
       self.canvas.create_line(start_x, start_y, end_x, end_y, fill=self.TRIANGLE_COLOR, dash=(4, 4))
-      last_x, last_y = self.robot[0], self.robot[1]
-      for i in range(10):
-        t = float(i+1) / 10.0
-        x, y = self.cubic_hermite_spline(t)
-        self.canvas.create_line(last_x, last_y, x, y, fill=self.PATH_COLOR)
-        last_x, last_y = x, y
-        print t, x, y
+    last_x, last_y = self.robot[0], self.robot[1]
+    for i in range(10):
+      t = float(i+1) / 10.0
+      x, y = self.cubic_hermite_spline(t)
+      self.canvas.create_line(last_x, last_y, x, y, fill=self.PATH_COLOR)
+      last_x, last_y = x, y
     # draw the ball, displaying its trajectory
     x = self.ball[0]
     y = self.ball[1]
