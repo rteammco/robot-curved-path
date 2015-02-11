@@ -6,6 +6,7 @@ class DemoUI():
   """Demo UI for the path computation stuff."""
   # computation constants
   CURVE_RATE = 1
+  CURVE_RESOLUTION = 25
   # display object sizes
   POINT_SIZE = 5
   LINE_SIZE = 25
@@ -216,8 +217,8 @@ class DemoUI():
       end_x, end_y = self.ball[0], self.ball[1]
       self.canvas.create_line(start_x, start_y, end_x, end_y, fill=self.TRIANGLE_COLOR, dash=(4, 4))
     last_x, last_y = self.robot[0], self.robot[1]
-    for i in range(10):
-      t = float(i+1) / 10.0
+    for i in range(self.CURVE_RESOLUTION):
+      t = float(i+1) / float(self.CURVE_RESOLUTION)
       x, y = self.cubic_hermite_spline(t)
       self.canvas.create_line(last_x, last_y, x, y, fill=self.PATH_COLOR)
       last_x, last_y = x, y
