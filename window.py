@@ -31,6 +31,7 @@ class DemoUI():
     self.canvas = Tk.Canvas(self.main_window, width=width, height=height, background=self.FIELD_COLOR)
     self.canvas.bind("<Button-1>", self.left_click_handle)
     self.canvas.bind("<Button-2>", self.right_click_handle)
+    self.canvas.bind("<Button-3>", self.right_click_handle)
     self.canvas.pack()
     # set the control UI: buttons and click action selection
     self.mode_var = Tk.IntVar()
