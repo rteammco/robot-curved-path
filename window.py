@@ -120,12 +120,10 @@ class DemoUI():
     for i in range(self.CURVE_RESOLUTION):
       t = float(i+1) / float(self.CURVE_RESOLUTION)
       x, y = self.get_point(t)
+      closest_idx, closest_dist = self.get_closest_obstacle(x, y)
       color = "black"
-      for o in self.obstacles:
-        dist = self.get_dist(o[0], o[1], x, y)
-        if dist < self.MIN_OBSTACLE_DIST:
-          color = "red"
-          break
+      if (closest_idx >= 0) and (closest_dist < self.MIN_OBSTACLE_DIST):
+        color = "red"
       points.append((x, y, color))
     return points
 
