@@ -122,9 +122,23 @@ class DemoUI():
       x, y = self.get_point(t)
       closest_idx, closest_dist = self.get_closest_obstacle(x, y)
       color = "black"
+      obstacle_idx = -1
       if (closest_idx >= 0) and (closest_dist < self.MIN_OBSTACLE_DIST):
         color = "red"
-      points.append((x, y, color))
+        obstacle_idx = closest_idx
+      points.append((x, y, color, obstacle_idx, closest_dist))
+    for i in range(len(points)):
+      p = points[i]
+      if p[3] >= 0:
+        obstacle = self.obstacles[p[3]]
+        tx = p[0] - obstacle[0]
+        ty = p[1] - obstacle[1]
+        norm = self.get_dist(0, 0, tx, ty)
+        tx /= float(norm)
+        ty /= float(norm)
+        diff = self.MIN_OBSTACLE_DIST - p[4]
+        p = (p[0] + tx*diff, p[1] + ty*diff, p[2], [3], p[4])
+        points[i] = p
     return points
 
   def get_point(self, t):
