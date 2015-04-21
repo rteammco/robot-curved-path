@@ -42,8 +42,6 @@ class DemoUI():
     for option, val in options:
       Tk.Radiobutton(self.main_window, text=option, variable=self.mode_var,
                      indicatoron=0, value=val).pack(anchor=Tk.CENTER)
-    Tk.Button(self.main_window, text="Compute Path",
-              command=self.compute_path).pack(anchor=Tk.CENTER)
     Tk.Button(self.main_window, text="Clear Everything",
               command=self.clear_all).pack(anchor=Tk.CENTER)
     # initialize object locations
@@ -108,21 +106,6 @@ class DemoUI():
     """
     top = abs((y2 - y1)*x0 - (x2 - x1)*y0 + x2*y1 - y2*x1)
     return top / self.get_dist(x1, y1, x2, y2)
-
-  def compute_path(self):
-    """Sets up the control point(s) for the path computation."""
-    # compute the control point (and add to the list)
-    control_point = self.compute_control_point()
-    self.ctrl_dist_to_base = self.distance_to_line(
-         self.robot[0], self.robot[1],
-         self.ball[0], self.ball[1],
-         control_point[0], control_point[1])
-    if len(self.control_points) == 0:
-      self.control_points.append(control_point)
-    else:
-      self.control_points[0] = control_point
-    # use control point to calculate the Bezier curve
-    self.render()
 
   def cubic_hermite_spline(self, t):
     """
