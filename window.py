@@ -8,10 +8,11 @@ class DemoUI():
   # computation constants
   CURVE_RATE = 1
   CURVE_RESOLUTION = 25
+  MIN_OBSTACLE_DIST = 50
   # display object sizes
   POINT_SIZE = 5
-  LINE_SIZE = 25
   OBSTACLE_SIZE = 7
+  LINE_SIZE = 25
   # display colors
   FIELD_COLOR = "#00680A"
   ROBOT_COLOR = "white"
@@ -113,6 +114,21 @@ class DemoUI():
     top = abs((y2 - y1)*x0 - (x2 - x1)*y0 + x2*y1 - y2*x1)
     return top / self.get_dist(x1, y1, x2, y2)
 
+  def get_points(self):
+    """Computes all points of the spline, and adjusts for obstacles."""
+    points = []
+    for i in range(self.CURVE_RESOLUTION):
+      t = float(i+1) / float(self.CURVE_RESOLUTION)
+      x, y = self.get_point(t)
+      color = "black"
+      for o in self.obstacles:
+        dist = self.get_dist(o[0], o[1], x, y)
+        if dist < self.MIN_OBSTACLE_DIST:
+          color = "red"
+          break
+      points.append((x, y, color))
+    return points
+
   def get_point(self, t):
     """Returns the points for the current curve algorithm."""
     return self.cubic_hermite_spline(t)
@@ -182,21 +198,18 @@ class DemoUI():
   def remove_obstacle(self, x, y):
     """Removes the closest obstalce to (x, y) if it is close enough."""
     min_dist = int(self.OBSTACLE_SIZE*1.5)
-    min_dist2 = min_dist*min_dist
     removed = []
     for i in range(len(self.obstacles)):
       obstacle = self.obstacles[i]
-      diff_x = x - obstacle[0]
-      diff_y = y - obstacle[1]
-      dist2 = (diff_x*diff_x + diff_y*diff_y)
-      if dist2 <= min_dist2:
-        removed.append((i, dist2))
+      dist = self.get_dist(obstacle[0], obstacle[1], x, y)
+      if dist <= min_dist:
+        removed.append((i, dist))
     idx = -1
-    for i, dist2 in removed:
+    for i, dist in removed:
       if idx < 0:
         idx = i
-        min_dist = dist2
-      elif (idx >= 0) and (dist2 < min_dist):
+        min_dist = dist
+      elif (idx >= 0) and (dist < min_dist):
         idx = i
     if idx >= 0:
       self.obstacles.pop(idx)
@@ -246,10 +259,12 @@ class DemoUI():
       end_x, end_y = self.ball[0], self.ball[1]
       self.canvas.create_line(start_x, start_y, end_x, end_y, fill=self.TRIANGLE_COLOR, dash=(4, 4))
     last_x, last_y = self.robot[0], self.robot[1]
-    for i in range(self.CURVE_RESOLUTION):
-      t = float(i+1) / float(self.CURVE_RESOLUTION)
-      x, y = self.get_point(t)
+    points = self.get_points()
+    for p in points:
+      x, y = p[0], p[1]
+      color = p[2]
       self.canvas.create_line(last_x, last_y, x, y, fill=self.PATH_COLOR)
+      self.canvas.create_oval(x-3, y-3, x+3, y+3, fill=color, outline="")
       last_x, last_y = x, y
     # draw the ball, displaying its trajectory
     x = self.ball[0]
