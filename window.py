@@ -195,24 +195,27 @@ class DemoUI():
     self.ball[2] = trajectory
     self.ball[3] = tangent
 
-  def remove_obstacle(self, x, y):
-    """Removes the closest obstalce to (x, y) if it is close enough."""
-    min_dist = int(self.OBSTACLE_SIZE*1.5)
-    removed = []
+  def get_closest_obstacle(self, x, y):
+    """
+    Returns the index and distance of the closest obstacle to the point x, y.
+    If no such obstalce exists, returns -1 for the index.
+    """
+    closest_idx = -1
+    closest_dist = 0
     for i in range(len(self.obstacles)):
       obstacle = self.obstacles[i]
       dist = self.get_dist(obstacle[0], obstacle[1], x, y)
-      if dist <= min_dist:
-        removed.append((i, dist))
-    idx = -1
-    for i, dist in removed:
-      if idx < 0:
-        idx = i
-        min_dist = dist
-      elif (idx >= 0) and (dist < min_dist):
-        idx = i
-    if idx >= 0:
-      self.obstacles.pop(idx)
+      if (closest_idx < 0) or (dist <= closest_dist):
+        closest_idx = i
+        closest_dist = dist
+    return closest_idx, closest_dist
+
+  def remove_obstacle(self, x, y):
+    """Removes the closest obstalce to (x, y) if it is close enough."""
+    min_dist = int(self.OBSTACLE_SIZE*1.5)
+    closest_idx, closest_dist = self.get_closest_obstacle(x, y)
+    if (closest_idx >= 0) and (closest_dist <= min_dist):
+      self.obstacles.pop(closest_idx)
 
   def add_obstacle(self, x, y):
     """Adds an obstacle and redraws the simulation."""
