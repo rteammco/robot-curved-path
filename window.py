@@ -11,6 +11,7 @@ class DemoUI():
   # display object sizes
   POINT_SIZE = 5
   LINE_SIZE = 25
+  OBSTACLE_SIZE = 7
   # display colors
   FIELD_COLOR = "#00680A"
   ROBOT_COLOR = "white"
@@ -75,12 +76,13 @@ class DemoUI():
       angle, normal = self.get_angle(self.robot[0], self.robot[1], event.x, event.y)
       if angle is not None:
         self.set_robot_orientation(angle, normal)
-        self.render()
     elif self.mode_var.get() == self.SELECT_BALL:
       angle, normal = self.get_angle(self.ball[0], self.ball[1], event.x, event.y)
       if angle is not None:
         self.set_ball_trajectory(angle, normal)
-        self.render()
+    else:
+      self.remove_obstacle(event.x, event.y)
+    self.render()
 
   def get_angle(self, x1, y1, x2, y2):
     """
@@ -177,6 +179,28 @@ class DemoUI():
     self.ball[2] = trajectory
     self.ball[3] = tangent
 
+  def remove_obstacle(self, x, y):
+    """Removes the closest obstalce to (x, y) if it is close enough."""
+    min_dist = int(self.OBSTACLE_SIZE*1.5)
+    min_dist2 = min_dist*min_dist
+    removed = []
+    for i in range(len(self.obstacles)):
+      obstacle = self.obstacles[i]
+      diff_x = x - obstacle[0]
+      diff_y = y - obstacle[1]
+      dist2 = (diff_x*diff_x + diff_y*diff_y)
+      if dist2 <= min_dist2:
+        removed.append((i, dist2))
+    idx = -1
+    for i, dist2 in removed:
+      if idx < 0:
+        idx = i
+        min_dist = dist2
+      elif (idx >= 0) and (dist2 < min_dist):
+        idx = i
+    if idx >= 0:
+      self.obstacles.pop(idx)
+
   def add_obstacle(self, x, y):
     """Adds an obstacle and redraws the simulation."""
     self.obstacles.append((x, y))
@@ -202,13 +226,14 @@ class DemoUI():
   def render(self):
     """Clears the canvas, and draws everything again."""
     self.canvas.delete("all")
-    r = self.POINT_SIZE
+    r = self.OBSTACLE_SIZE
     # draw obstacles
     for pnt in self.obstacles:
       x = pnt[0]
       y = pnt[1]
       self.canvas.create_oval(x-r, y-r, x+r, y+r, fill=self.OBSTACLE_COLOR, outline="")
     # draw control points (for the curve)
+    r = self.POINT_SIZE
     for pnt in self.control_points:
       x = pnt[0]
       y = pnt[1]
