@@ -1,5 +1,6 @@
 import Tkinter as Tk
 import math
+import random
 
 
 class DemoUI():
@@ -28,6 +29,7 @@ class DemoUI():
     # initialize window and event listeners
     self.main_window = Tk.Tk()
     self.main_window.title("Demo")
+    self.canvas_size = (width, height)
     self.canvas = Tk.Canvas(self.main_window, width=width, height=height, background=self.FIELD_COLOR)
     self.canvas.bind("<Button-1>", self.left_click_handle)
     self.canvas.bind("<Button-2>", self.right_click_handle)
@@ -42,6 +44,8 @@ class DemoUI():
     for option, val in options:
       Tk.Radiobutton(self.main_window, text=option, variable=self.mode_var,
                      indicatoron=0, value=val).pack(anchor=Tk.CENTER)
+    Tk.Button(self.main_window, text="Add Random Obstacles",
+              command=self.add_random_obstacles).pack(anchor=Tk.CENTER)
     Tk.Button(self.main_window, text="Clear Everything",
               command=self.clear_all).pack(anchor=Tk.CENTER)
     # initialize object locations
@@ -106,6 +110,10 @@ class DemoUI():
     """
     top = abs((y2 - y1)*x0 - (x2 - x1)*y0 + x2*y1 - y2*x1)
     return top / self.get_dist(x1, y1, x2, y2)
+
+  def get_point(self, t):
+    """Returns the points for the current curve algorithm."""
+    return self.cubic_hermite_spline(t)
 
   def cubic_hermite_spline(self, t):
     """
@@ -173,6 +181,18 @@ class DemoUI():
     """Adds an obstacle and redraws the simulation."""
     self.obstacles.append((x, y))
 
+  def add_random_obstacles(self):
+    """
+    Adds a list of 10 random obstacles on the field. All previous obstacles
+    are removed in the process.
+    """
+    self.clear_all()
+    for i in range(10):
+      rand_x = random.randint(1, self.canvas_size[0]-1)
+      rand_y = random.randint(1, self.canvas_size[1]-1)
+      self.add_obstacle(rand_x, rand_y)
+    self.render()
+
   def get_line_endpoints(self, x, y, angle):
     """Returns the end points of a line (LINE_SIZE long) given the angle and start point."""
     end_x = int(x + self.LINE_SIZE * math.cos(angle))
@@ -203,7 +223,7 @@ class DemoUI():
     last_x, last_y = self.robot[0], self.robot[1]
     for i in range(self.CURVE_RESOLUTION):
       t = float(i+1) / float(self.CURVE_RESOLUTION)
-      x, y = self.cubic_hermite_spline(t)
+      x, y = self.get_point(t)
       self.canvas.create_line(last_x, last_y, x, y, fill=self.PATH_COLOR)
       last_x, last_y = x, y
     # draw the ball, displaying its trajectory
